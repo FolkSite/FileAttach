@@ -23,3 +23,6 @@ $_lang['setting_fileattach.private_desc'] = 'Save files with random name by defa
 
 $_lang['setting_fileattach.download'] = 'Count downloads';
 $_lang['setting_fileattach.download_desc'] = 'Count downloads increases DB load';
+
+$_lang['setting_fileattach.force_download'] = 'Force download';
+$_lang['setting_fileattach.force_download_desc'] = '';

@@ -48,24 +48,35 @@ class FileItemDownloadProcessor extends modObjectProcessor {
      * @return redirect or bytestream
     */
     public function process() {
-	// Count downloads if allowed by config
-	if ($this->modx->getOption('fileattach.download', null, true)) {
-	    $this->object->set('download', $this->object->get('download') + 1);
-	    $this->object->save();
-	}
+        // Count downloads if allowed by config
+        if ($this->modx->getOption('fileattach.download', null, true)) {
+            $this->object->set('download', $this->object->get('download') + 1);
+            $this->object->save();
+        }
 
         @session_write_close();
 
         // If file is private then redirect else read file directly
-	if ($this->object->get('private')) {
-	    header("Content-Type: application/force-download");
-    	    header("Content-Disposition: attachment; filename=\"" . $this->object->get('name') . "\"");
-	    readfile($this->object->getFullPath());
-	} else {
-	    // In private mode redirect to file url
-	    $fileurl = $this->object->getUrl();
-	    header("Location: $fileurl", true, 302);
-	}
+        if ($this->object->get('private')) {
+            if ($this->modx->getOption('fileattach.force_download', null, true)) {
+                header("Content-Type: application/force-download");
+                header("Content-Disposition: attachment; filename=\"" . $this->object->get('name') . "\"");
+            }
+            else {
+                $fi = finfo_open(FILEINFO_MIME_TYPE);
+                $mimeType = finfo_file($fi, $this->object->getFullPath());
+                header("Content-Type: ".$mimeType);
+                header("Content-Disposition: inline; filename=\"" . $this->object->get('name') . "\"");
+                header('Content-Transfer-Encoding: binary');
+                header('Accept-Ranges: bytes');
+            }
+
+            readfile($this->object->getFullPath());
+        } else {
+            // In private mode redirect to file url
+            $fileurl = $this->object->getUrl();
+            header("Location: $fileurl", true, 302);
+        }
     }
 }
 
